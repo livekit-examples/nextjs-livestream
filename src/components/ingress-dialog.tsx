@@ -14,6 +14,7 @@ import {
 } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AllowParticipationInfo } from "./allow-participation-info";
 import { Spinner } from "./spinner";
 
 export function IngressDialog({ children }: { children: React.ReactNode }) {
@@ -164,9 +165,12 @@ export function IngressDialog({ children }: { children: React.ReactNode }) {
                   />
                 </Flex>
                 <Flex justify="between">
-                  <Text as="div" size="2" mb="1" weight="bold">
-                    Viewers can request to cast
-                  </Text>
+                  <Flex align="center" gap="2">
+                    <Text as="div" size="2" weight="bold">
+                      Viewers can participate
+                    </Text>
+                    <AllowParticipationInfo />
+                  </Flex>
                   <Switch
                     checked={allowParticipation}
                     onCheckedChange={(e) => setAllowParticipation(e)}

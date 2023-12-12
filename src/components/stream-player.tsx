@@ -1,6 +1,8 @@
 import { useCopyToClipboard } from "@/lib/clipboard";
 import { ParticipantMetadata } from "@/lib/controller";
 import {
+  AudioTrack,
+  StartAudio,
   VideoTrack,
   useDataChannel,
   useLocalParticipant,
@@ -109,10 +111,10 @@ export function StreamPlayer({ isHost = false }) {
   };
 
   useEffect(() => {
-    if (localParticipant.permissions?.canPublish) {
+    if (canHost) {
       void createTracks();
     }
-  }, [localParticipant]);
+  }, [canHost]);
 
   useEffect(() => {
     return () => {
@@ -121,7 +123,11 @@ export function StreamPlayer({ isHost = false }) {
     };
   }, [localVideoTrack, localAudioTrack]);
 
-  const tracks = useTracks([Track.Source.Camera]).filter(
+  const videoTracks = useTracks([Track.Source.Camera]).filter(
+    (t) => t.participant.identity !== localParticipant.identity
+  );
+
+  const audioTracks = useTracks([Track.Source.Microphone]).filter(
     (t) => t.participant.identity !== localParticipant.identity
   );
 
@@ -145,7 +151,7 @@ export function StreamPlayer({ isHost = false }) {
             </div>
           </div>
         )}
-        {tracks.map((t) => (
+        {videoTracks.map((t) => (
           <div key={t.participant.identity} className="relative">
             <VideoTrack
               trackRef={t}
@@ -163,7 +169,14 @@ export function StreamPlayer({ isHost = false }) {
           </div>
         ))}
       </Grid>
+      {audioTracks.map((t, i) => (
+        <AudioTrack trackRef={t} key={i} />
+      ))}
       <ConfettiCanvas />
+      <StartAudio
+        label="Click to allow audio playback"
+        className="absolute top-0 h-full w-full bg-gray-2-translucent text-white"
+      />
       <div className="absolute top-0 w-full p-2">
         <Flex justify="between" align="end">
           <Button
