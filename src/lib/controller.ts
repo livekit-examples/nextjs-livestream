@@ -3,11 +3,17 @@
 import jwt from "jsonwebtoken";
 import {
   AccessToken,
+  CreateIngressOptions,
+  IngressAudioEncodingPreset,
   IngressClient,
+  IngressInfo,
+  IngressInput,
+  IngressVideoEncodingPreset,
   ParticipantInfo,
   ParticipantPermission,
   RoomServiceClient,
 } from "livekit-server-sdk";
+import { TrackSource } from "livekit-server-sdk/dist/proto/livekit_models";
 
 export type RoomMetadata = {
   creator_identity: string;
@@ -35,6 +41,18 @@ export type Session = {
 export type ConnectionDetails = {
   token: string;
   ws_url: string;
+};
+
+export type CreateIngressParams = {
+  room_name?: string;
+  ingress_type: string;
+  metadata: RoomMetadata;
+};
+
+export type CreateIngressResponse = {
+  ingress: IngressInfo;
+  auth_token: string;
+  connection_details: ConnectionDetails;
 };
 
 export type CreateStreamParams = {
@@ -84,19 +102,96 @@ export function getSessionFromReq(req: Request): Session {
 }
 
 export class Controller {
-  private ingress: IngressClient;
+  private ingressService: IngressClient;
   private roomService: RoomServiceClient;
 
   constructor() {
     const httpUrl = process.env
       .LIVEKIT_WS_URL!.replace("wss://", "https://")
       .replace("ws://", "http://");
-    this.ingress = new IngressClient(httpUrl);
+    this.ingressService = new IngressClient(httpUrl);
     this.roomService = new RoomServiceClient(
       httpUrl,
       process.env.LIVEKIT_API_KEY!,
       process.env.LIVEKIT_API_SECRET!
     );
+  }
+
+  async createIngress({
+    metadata,
+    room_name,
+    ingress_type = "rtmp",
+  }: CreateIngressParams): Promise<CreateIngressResponse> {
+    if (!room_name) {
+      room_name = generateRoomId();
+    }
+
+    // Create room and ingress
+
+    await this.roomService.createRoom({
+      name: room_name,
+      metadata: JSON.stringify(metadata),
+    });
+
+    const options: CreateIngressOptions = {
+      name: room_name,
+      roomName: room_name,
+      participantName: metadata.creator_identity + " (via OBS)",
+      participantIdentity: metadata.creator_identity + " (via OBS)",
+    };
+
+    if (ingress_type === "whip") {
+      // https://docs.livekit.io/egress-ingress/ingress/overview/#bypass-transcoding-for-whip-sessions
+      options.bypassTranscoding = true;
+    } else {
+      options.video = {
+        source: TrackSource.CAMERA,
+        preset: IngressVideoEncodingPreset.H264_1080P_30FPS_3_LAYERS,
+      };
+      options.audio = {
+        source: TrackSource.MICROPHONE,
+        preset: IngressAudioEncodingPreset.OPUS_STEREO_96KBPS,
+      };
+    }
+
+    const ingress = await this.ingressService.createIngress(
+      ingress_type === "whip"
+        ? IngressInput.WHIP_INPUT
+        : IngressInput.RTMP_INPUT,
+      options
+    );
+
+    // Create viewer access token
+
+    const at = new AccessToken(
+      process.env.LIVEKIT_API_KEY!,
+      process.env.LIVEKIT_API_SECRET!,
+      {
+        identity: metadata.creator_identity,
+      }
+    );
+
+    at.addGrant({
+      room: room_name,
+      roomJoin: true,
+      canPublish: false,
+      canSubscribe: true,
+      canPublishData: true,
+    });
+
+    const authToken = this.createAuthToken(
+      room_name,
+      metadata.creator_identity
+    );
+
+    return {
+      ingress,
+      auth_token: authToken,
+      connection_details: {
+        ws_url: process.env.LIVEKIT_WS_URL!,
+        token: at.toJwt(),
+      },
+    };
   }
 
   async createStream({

@@ -63,7 +63,7 @@ export function StreamPlayer({ isHost = false }) {
     : localMetadata?.invited_to_stage && !localMetadata?.hand_raised;
 
   const togglePublishing = useCallback(async () => {
-    if (isPublishing && localParticipant) {
+    if (isPublishing && localParticipant.permissions?.canPublish) {
       setIsUnpublishing(true);
 
       if (localVideoTrack) {
@@ -109,8 +109,10 @@ export function StreamPlayer({ isHost = false }) {
   };
 
   useEffect(() => {
-    void createTracks();
-  }, [canHost]);
+    if (localParticipant.permissions?.canPublish) {
+      void createTracks();
+    }
+  }, [localParticipant]);
 
   useEffect(() => {
     return () => {

@@ -1,7 +1,5 @@
 import "@/styles/globals.css";
 
-import "@radix-ui/themes/styles.css";
-
 import { NextThemeProvider } from "@/components/theme-provider";
 import { Theme, ThemePanel } from "@radix-ui/themes";
 import type { Metadata } from "next";

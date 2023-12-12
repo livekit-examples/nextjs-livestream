@@ -1,9 +1,10 @@
 "use client";
 
-import { ParticipantMetadata } from "@/lib/controller";
+import { ParticipantMetadata, RoomMetadata } from "@/lib/controller";
 import {
   useLocalParticipant,
   useParticipants,
+  useRoomContext,
 } from "@livekit/components-react";
 import { Cross1Icon, PersonIcon } from "@radix-ui/react-icons";
 import {
@@ -27,9 +28,11 @@ function ParticipantListItem({
   isHost?: boolean;
 }) {
   const authToken = useAuthToken();
-
-  const metadata = (participant.metadata &&
+  const participantMetadata = (participant.metadata &&
     JSON.parse(participant.metadata)) as ParticipantMetadata;
+  const room = useRoomContext();
+  const roomMetadata = (room.metadata &&
+    JSON.parse(room.metadata)) as RoomMetadata;
 
   const onInvite = async () => {
     // TODO: optimistic update
@@ -72,13 +75,16 @@ function ParticipantListItem({
 
   function HostActions() {
     if (!isCurrentUser) {
-      if (metadata.invited_to_stage && metadata.hand_raised) {
+      if (
+        participantMetadata.invited_to_stage &&
+        participantMetadata.hand_raised
+      ) {
         return (
           <Button size="1" variant="outline" onClick={onCancel}>
             Remove
           </Button>
         );
-      } else if (metadata.hand_raised) {
+      } else if (participantMetadata.hand_raised) {
         return (
           <Flex gap="2">
             <Button size="1" onClick={onInvite}>
@@ -89,13 +95,13 @@ function ParticipantListItem({
             </Button>
           </Flex>
         );
-      } else if (metadata.invited_to_stage) {
+      } else if (participantMetadata.invited_to_stage) {
         return (
           <Button size="1" variant="outline" disabled>
             Pending
           </Button>
         );
-      } else if (!metadata.invited_to_stage) {
+      } else if (!participantMetadata.invited_to_stage) {
         return (
           <Button size="1" onClick={onInvite}>
             Invite to stage
@@ -107,13 +113,19 @@ function ParticipantListItem({
 
   function ViewerActions() {
     if (isCurrentUser) {
-      if (metadata.invited_to_stage && metadata.hand_raised) {
+      if (
+        participantMetadata.invited_to_stage &&
+        participantMetadata.hand_raised
+      ) {
         return (
           <Button size="1" onClick={onCancel}>
             Leave stage
           </Button>
         );
-      } else if (metadata.invited_to_stage && !metadata.hand_raised) {
+      } else if (
+        participantMetadata.invited_to_stage &&
+        !participantMetadata.hand_raised
+      ) {
         return (
           <Flex gap="2">
             <Button size="1" onClick={onRaiseHand}>
@@ -124,13 +136,19 @@ function ParticipantListItem({
             </Button>
           </Flex>
         );
-      } else if (!metadata.invited_to_stage && metadata.hand_raised) {
+      } else if (
+        !participantMetadata.invited_to_stage &&
+        participantMetadata.hand_raised
+      ) {
         return (
           <Button size="1" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
         );
-      } else if (!metadata.invited_to_stage && !metadata.hand_raised) {
+      } else if (
+        !participantMetadata.invited_to_stage &&
+        !participantMetadata.hand_raised
+      ) {
         return (
           <Button size="1" onClick={onRaiseHand}>
             Raise hand
@@ -153,7 +171,11 @@ function ParticipantListItem({
           {isCurrentUser && " (you)"}
         </Text>
       </Flex>
-      {isHost ? <HostActions /> : <ViewerActions />}
+      {isHost && roomMetadata.allow_participation ? (
+        <HostActions />
+      ) : (
+        <ViewerActions />
+      )}
     </Flex>
   );
 }
@@ -190,21 +212,23 @@ export function PresenceDialog({
           </Flex>
         </Dialog.Title>
         <Flex direction="column" gap="4" mt="4">
-          <Flex direction="column" gap="2">
-            <Text size="1" className="uppercase font-bold text-gray-11">
-              {hosts.length > 1 ? "Co-Hosts" : "Host"}
-            </Text>
-            {hosts.map((participant) => (
-              <ParticipantListItem
-                key={participant.identity}
-                participant={participant}
-                isCurrentUser={
-                  participant.identity === localParticipant.identity
-                }
-                isHost={isHost}
-              />
-            ))}
-          </Flex>
+          {hosts.length > 0 && (
+            <Flex direction="column" gap="2">
+              <Text size="1" className="uppercase font-bold text-gray-11">
+                {hosts.length > 1 ? "Co-Hosts" : "Host"}
+              </Text>
+              {hosts.map((participant) => (
+                <ParticipantListItem
+                  key={participant.identity}
+                  participant={participant}
+                  isCurrentUser={
+                    participant.identity === localParticipant.identity
+                  }
+                  isHost={isHost}
+                />
+              ))}
+            </Flex>
+          )}
           {viewers.length > 0 && (
             <Flex direction="column" gap="2">
               <Text size="1" className="uppercase font-bold text-gray-11">

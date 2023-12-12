@@ -20,7 +20,7 @@ export function BroadcastDialog({ children }: { children: React.ReactNode }) {
   const [roomName, setRoomName] = useState("");
   const [name, setName] = useState("");
   const [enableChat, setEnableChat] = useState(true);
-  const [allowParticipant, setAllowParticipation] = useState(true);
+  const [allowParticipation, setAllowParticipation] = useState(true);
 
   const onGoLive = async () => {
     setLoading(true);
@@ -32,7 +32,7 @@ export function BroadcastDialog({ children }: { children: React.ReactNode }) {
         metadata: {
           creator_identity: name,
           enable_chat: enableChat,
-          allow_participant: allowParticipant,
+          allow_participation: allowParticipation,
         },
       }),
     });
@@ -49,7 +49,7 @@ export function BroadcastDialog({ children }: { children: React.ReactNode }) {
 
       <Dialog.Content style={{ maxWidth: 450 }}>
         <Dialog.Title>Create new stream</Dialog.Title>
-        <Flex direction="column" gap="3" mt="4">
+        <Flex direction="column" gap="4" mt="4">
           <label>
             <Text as="div" size="2" mb="1" weight="bold">
               Room name
@@ -72,7 +72,7 @@ export function BroadcastDialog({ children }: { children: React.ReactNode }) {
               onChange={(e) => setName(e.target.value)}
             />
           </label>
-          <Flex direction="column" gap="2" mt="2">
+          <Flex direction="column" gap="2">
             <Flex justify="between">
               <Text as="div" size="2" mb="1" weight="bold">
                 Enable chat
@@ -87,7 +87,7 @@ export function BroadcastDialog({ children }: { children: React.ReactNode }) {
                 Viewers can request to cast
               </Text>
               <Switch
-                checked={allowParticipant}
+                checked={allowParticipation}
                 onCheckedChange={(e) => setAllowParticipation(e)}
               />
             </Flex>
