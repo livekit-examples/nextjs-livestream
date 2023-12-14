@@ -24,8 +24,8 @@ export default function Home() {
             <Kbd>⌘&thinsp;C</Kbd> !
           </Text>
           <HomeActions />
-          <Separator orientation="horizontal" size="4" className="my-4" />
-          <Text as="p">
+          <Separator orientation="horizontal" size="4" className="my-2" />
+          <Text as="p" size="2">
             Feel free to clone this full-stack NextJS app{" "}
             <Link
               href="https://github.com/livekit-examples/nextjs-livestream"

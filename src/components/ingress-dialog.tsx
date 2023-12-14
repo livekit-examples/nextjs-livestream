@@ -93,8 +93,7 @@ export function IngressDialog({ children }: { children: React.ReactNode }) {
                     )
                   }
                 >
-                  Go to room as viewer{" "}
-                  <ArrowRightIcon className="animate-wiggle" />
+                  Join as viewer <ArrowRightIcon className="animate-wiggle" />
                 </Button>
               </Flex>
             </Flex>
@@ -186,7 +185,10 @@ export function IngressDialog({ children }: { children: React.ReactNode }) {
                   color="gray"
                   onClick={() => {
                     setRoomName("");
+                    setName("");
                     setType("rtmp");
+                    setEnableChat(true);
+                    setAllowParticipation(true);
                   }}
                 >
                   Cancel

@@ -46,11 +46,7 @@ function ChatMessage({ message }: { message: ReceivedChatMessage }) {
   );
 }
 
-export function Chat({
-  variant = "sidebar",
-}: {
-  variant?: "sidebar" | "overlay";
-}) {
+export function Chat() {
   const [draft, setDraft] = useState("");
   const { chatMessages, send } = useChat();
   const { metadata } = useRoomInfo();
@@ -75,10 +71,6 @@ export function Chat({
       await send(draft);
     }
   };
-
-  if (variant === "overlay") {
-    // TODO: render chat that goes over the video
-  }
 
   return (
     <Flex direction="column" className="h-full">
