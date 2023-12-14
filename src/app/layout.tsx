@@ -21,7 +21,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <NextThemeProvider>
-          <Theme accentColor="purple" grayColor="mauve">
+          <Theme
+            appearance="dark"
+            accentColor="purple"
+            grayColor="mauve"
+            radius="none"
+          >
             {children}
             <ThemePanel defaultOpen={false} />
           </Theme>
