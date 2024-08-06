@@ -18,7 +18,6 @@
     "livekit-client": "^1.15.2",
     "livekit-server-sdk": "^1.2.7",
     "next": "14.0.1",
-    "next-themes": "^0.2.1",
     "react": "^18",
     "react-dom": "^18",
     "tailwind-merge": "^2.0.0"

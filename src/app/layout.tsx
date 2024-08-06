@@ -1,6 +1,5 @@
 import "@/styles/globals.css";
 
-import { NextThemeProvider } from "@/components/theme-provider";
 import { Theme, ThemePanel } from "@radix-ui/themes";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -20,17 +19,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <NextThemeProvider>
-          <Theme
-            appearance="dark"
-            accentColor="purple"
-            grayColor="mauve"
-            radius="none"
-          >
-            {children}
-            <ThemePanel defaultOpen={false} />
-          </Theme>
-        </NextThemeProvider>
+        <Theme
+          appearance="dark"
+          accentColor="purple"
+          grayColor="mauve"
+          radius="none"
+        >
+          {children}
+          <ThemePanel defaultOpen={false} />
+        </Theme>
       </body>
     </html>
   );
