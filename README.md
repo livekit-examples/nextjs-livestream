@@ -1,7 +1,7 @@
 # Livestream with LiveKit
 
 > [!TIP]
-> Try a live demo here 👉 [livestream.livekit.io](https://livestream.livekit.io)
+> This repo has been moved! 👉 [livekit-examples/livestream](https://github.com/livekit-examples/livestream)
 
 Today most livestreams experience a 5–30 second lag, which is evident in the delay it takes for streamers to respond to chats. Those streams use HLS, which leverages existing CDNs by uploading 5–30 second video chunks, which clients download one chunk at a time. HLS is hugely scalable, but it comes with latency.
 
